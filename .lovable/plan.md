@@ -1,47 +1,69 @@
 
 
-# Mobile Optimierung & 3D-Modellansicht
+# Integrierte Projektplattform Holzbau – Clickdummy
 
-## Probleme & Anforderungen
-1. **Mobile Responsiveness**: Tabellen/Inhalte werden auf Handys zu breit, keine mobile-optimierte Darstellung
-2. **Element-Detail auf Mobile**: Wenn ein Element angeklickt wird, soll ein Info-Drawer/Sheet statt eines Seitenpanels erscheinen
-3. **3D-Modellansicht**: ModelViewer soll eine interaktive 3D-Ansicht mit React Three Fiber erhalten, Elemente bleiben klickbar
-4. **Gesamte App mobile-optimiert**: Header, Tabs, Tabellen, Dashboard-Karten
+## Überblick
+Ein vorzeigbarer, interaktiver High-Fidelity Clickdummy einer integrierten Holzbau-Plattform. Alle Inhalte sind Mock-Daten, keine echte Logik. Deutsche UI, modernes, ruhiges Design.
 
-## Änderungen
+---
 
-### 1. AppLayout – Mobile Header
-- `SelectTrigger` Breite responsive: `w-full sm:w-[320px]`
-- Padding `p-3 sm:p-6` auf main
+## 1. Layout & Navigation
+- **Linke Seitenleiste** mit Logo und Navigation: Projektübersicht, Dashboard, AVOR, Produktion, Montage, Fertigstellung, QM/Qualität, Dateiablage
+- **Header** mit Projektauswahl (z.B. "25.0044 – Neubau WDC3 Bern")
+- Collapsible Sidebar mit Icons im Mini-Modus
+- Farbschema: Neutral, modern, professionell (Grautöne mit Akzentfarbe)
 
-### 2. ModelViewer → 3D mit React Three Fiber
-- Install `@react-three/fiber@^8.18`, `three@^0.166`, `@react-three/drei@^9.122.0`
-- Neuer `ModelViewer3D` Komponente: Canvas mit OrbitControls, klickbare 3D-Boxen (Wände) farbcodiert nach QM-Status
-- Gebäude als gruppierte Meshes (Wände EG, OG1, Dach, Fundament)
-- Klick auf Element: auf Mobile → Drawer/Sheet öffnen; auf Desktop → Seitenpanel wie bisher
-- `useIsMobile()` Hook steuert ob Sheet oder Seitenpanel
+## 2. Projektübersicht
+- Kachelansicht aller Projekte (3-4 Mock-Projekte)
+- Jede Karte zeigt: Projektnummer, Name, Ampel-Status, Kurzinfo
+- Klick öffnet das jeweilige Projekt-Dashboard
 
-### 3. Alle Seiten – Mobile Tabs
-- `TabsList` erhält `flex-wrap` und `h-auto` damit Tabs umbrechen statt zu überflaufen
-- Tabellen erhalten `overflow-x-auto` Wrapper
+## 3. Projekt-Dashboard
+- Projektname & Nummer prominent
+- **Ampel-Status** (Grün/Gelb/Rot) als visueller Indikator
+- **Fortschrittsbalken** für AVOR, Produktion, Montage, Fertigstellung
+- **QM-Status-Box**: Offene Punkte, freigegebene Elemente, kritische Punkte
+- **Schnellaktionen**: "Projekt öffnen", "QM anzeigen", "Zum Modell"
 
-### 4. Dashboard & Projektübersicht
-- Grid-Anpassung: `grid-cols-1` auf Mobile statt `grid-cols-2/4`
-- QM-Status grid: `grid-cols-1 sm:grid-cols-3`
-- Quick-Action Buttons: `flex-wrap` für Mobile
+## 4. AVOR-Bereich
+- Unternavigation (Tabs): Modell, Terminprogramm, Listen, Pläne, Details, Dateiablage, Bestellungen
+- Modell-Tab: Schematischer 3D-Platzhalter (stilisierte Gebäudeansicht)
+- Listen/Pläne: Tabellenansichten mit Mock-Daten
+- Terminprogramm: Einfaches Gantt-ähnliches Balkendiagramm
 
-### 5. QM-Seite
-- Filter: `flex-wrap` statt nebeneinander
-- Freigabe-Workflow: vertikale Darstellung auf Mobile
-- Tabelle: horizontales Scrollen
+## 5. Produktion-Bereich
+- Tabs: Modell, Details, Elementpläne, Logistikpläne, Bestellungen, Rüstlisten, Maschinendaten
+- Tabellenansichten mit Mock-Elementen (z.B. AW_EG_01 bis AW_EG_12)
+- Status-Badges pro Element
 
-### 6. Bereiche (Produktion, Montage, etc.)
-- Tabellen mit `overflow-x-auto` Wrapper
-- Grid-Karten: `grid-cols-1 sm:grid-cols-2 md:grid-cols-3`
+## 6. Montage-Bereich
+- Tabs: Modell, Details, Montagepläne, Logistikpläne, Bestellungen, Tachymeterdaten
+- Ähnliche Struktur wie Produktion mit montagespezifischen Mock-Daten
 
-## Technische Details
-- Neue Dependency: `@react-three/fiber@^8.18`, `three@^0.166`, `@react-three/drei@^9.122.0`
-- Neue Datei: `src/components/ModelViewer3D.tsx` – 3D Canvas mit OrbitControls
-- Geänderte Dateien: `ModelViewer.tsx` (ersetzt durch 3D), `AppLayout.tsx`, `Dashboard.tsx`, `Projektuebersicht.tsx`, `QmQualitaet.tsx`, `Avor.tsx`, `Produktion.tsx`, `Montage.tsx`, `Fertigstellung.tsx`, `Dateiablage.tsx`
-- Auf Mobile: Element-Klick öffnet ein Sheet/Drawer mit QM-Details statt Seitenpanel
+## 7. Fertigstellung-Bereich
+- Tabs: Modell, Rüstlisten, Bestellungen, Pläne
+- Kompaktere Darstellung, Fokus auf Abschluss-Status
+
+## 8. QM / Qualität (Kernbereich)
+- **QM-Punkteliste**: Tabelle mit Element, Bereich, Status, Beschreibung, Priorität
+- **Filter**: Nach Bereich (AVOR/Produktion/Montage), Status (Offen/In Bearbeitung/Freigegeben), Element
+- **Status-Badges**: Farbcodiert (Rot=Offen, Gelb=In Bearbeitung, Grün=Freigegeben)
+- **Freigabe-Workflow** (visuell): AVOR → Produktion → Montage mit simulierten Freigabe-Buttons
+- **Element-Detail-Ansicht**: Klick auf Element zeigt zugehörige QM-Einträge
+
+## 9. Modell-Darstellung
+- Stilisierter 3D-Platzhalter (SVG/Illustration eines Holzbau-Gebäudes)
+- Klickbare Elemente (farblich markiert nach QM-Status)
+- Klick auf Element → Seitenpanel mit QM-Einträgen
+
+## 10. Zentrale Dateiablage
+- Ordnerstruktur mit Mock-Dateien (PDFs, Pläne, Bilder)
+- Keine echten Uploads, nur Darstellung
+
+## 11. Design & UX
+- Ruhige, neutrale Farbpalette (Weiß, Grau, dezente Blautöne)
+- Ampelfarben nur für Status (Grün/Gelb/Rot)
+- Klare Typografie, großzügige Abstände
+- Responsive aber Desktop-optimiert
+- Alle Texte auf Deutsch
 
