@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import ModelViewer from "@/components/ModelViewer";
+import ModelViewer3D from "@/components/ModelViewer3D";
 
 export default function Avor() {
   return (
     <div>
       <h1 className="mb-4 text-2xl font-bold">AVOR</h1>
       <Tabs defaultValue="modell">
-        <TabsList>
+        <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="modell">Modell</TabsTrigger>
           <TabsTrigger value="terminprogramm">Terminprogramm</TabsTrigger>
           <TabsTrigger value="listen">Listen</TabsTrigger>
@@ -18,7 +18,7 @@ export default function Avor() {
         </TabsList>
 
         <TabsContent value="modell" className="mt-4">
-          <ModelViewer />
+          <ModelViewer3D />
         </TabsContent>
 
         <TabsContent value="terminprogramm" className="mt-4">
@@ -33,7 +33,7 @@ export default function Avor() {
                 { label: "Fertigstellung", start: 75, width: 20, color: "bg-muted-foreground/30" },
               ].map((bar) => (
                 <div key={bar.label} className="flex items-center gap-3">
-                  <span className="w-40 text-sm text-muted-foreground">{bar.label}</span>
+                  <span className="w-28 sm:w-40 text-xs sm:text-sm text-muted-foreground truncate">{bar.label}</span>
                   <div className="relative h-6 flex-1 rounded bg-muted">
                     <div
                       className={`absolute h-full rounded ${bar.color}`}
@@ -50,35 +50,37 @@ export default function Avor() {
         </TabsContent>
 
         <TabsContent value="listen" className="mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Element</TableHead>
-                <TableHead>Typ</TableHead>
-                <TableHead>Geschoss</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {["AW_EG_01", "AW_EG_02", "AW_EG_03", "DE_EG_01", "IW_EG_01"].map((el) => (
-                <TableRow key={el}>
-                  <TableCell className="font-medium">{el}</TableCell>
-                  <TableCell>{el.startsWith("AW") ? "Aussenwand" : el.startsWith("DE") ? "Decke" : "Innenwand"}</TableCell>
-                  <TableCell>EG</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">Bereit</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Element</TableHead>
+                  <TableHead>Typ</TableHead>
+                  <TableHead>Geschoss</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {["AW_EG_01", "AW_EG_02", "AW_EG_03", "DE_EG_01", "IW_EG_01"].map((el) => (
+                  <TableRow key={el}>
+                    <TableCell className="font-medium">{el}</TableCell>
+                    <TableCell>{el.startsWith("AW") ? "Aussenwand" : el.startsWith("DE") ? "Decke" : "Innenwand"}</TableCell>
+                    <TableCell>EG</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">Bereit</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </TabsContent>
 
         <TabsContent value="plaene" className="mt-4">
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {["Grundriss EG", "Grundriss OG1", "Schnitt A-A", "Fassade Nord", "Fassade Süd"].map((p) => (
               <div key={p} className="flex items-center gap-3 rounded-lg border p-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded bg-muted text-xs font-medium text-muted-foreground">PDF</div>
-                <div>
-                  <p className="text-sm font-medium">{p}</p>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted text-xs font-medium text-muted-foreground">PDF</div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{p}</p>
                   <p className="text-xs text-muted-foreground">Letzte Änderung: Jan 2025</p>
                 </div>
               </div>
@@ -99,30 +101,32 @@ export default function Avor() {
         </TabsContent>
 
         <TabsContent value="bestellungen" className="mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Best.-Nr.</TableHead>
-                <TableHead>Material</TableHead>
-                <TableHead>Menge</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[
-                { nr: "B-001", mat: "KVH 60x160", menge: "240 lfm", status: "Bestellt" },
-                { nr: "B-002", mat: "OSB 15mm", menge: "120 m²", status: "Geliefert" },
-                { nr: "B-003", mat: "Dämmung 160mm", menge: "95 m²", status: "Offen" },
-              ].map((b) => (
-                <TableRow key={b.nr}>
-                  <TableCell className="font-medium">{b.nr}</TableCell>
-                  <TableCell>{b.mat}</TableCell>
-                  <TableCell>{b.menge}</TableCell>
-                  <TableCell className="text-sm">{b.status}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Best.-Nr.</TableHead>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Menge</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {[
+                  { nr: "B-001", mat: "KVH 60x160", menge: "240 lfm", status: "Bestellt" },
+                  { nr: "B-002", mat: "OSB 15mm", menge: "120 m²", status: "Geliefert" },
+                  { nr: "B-003", mat: "Dämmung 160mm", menge: "95 m²", status: "Offen" },
+                ].map((b) => (
+                  <TableRow key={b.nr}>
+                    <TableCell className="font-medium">{b.nr}</TableCell>
+                    <TableCell>{b.mat}</TableCell>
+                    <TableCell>{b.menge}</TableCell>
+                    <TableCell className="text-sm">{b.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

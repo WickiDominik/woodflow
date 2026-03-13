@@ -9,12 +9,12 @@ export default function AppLayout() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <div className="flex flex-1 flex-col">
-          <header className="flex h-14 items-center gap-3 border-b bg-card px-4">
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <header className="flex h-14 items-center gap-3 border-b bg-card px-3 sm:px-4">
             <SidebarTrigger />
             <div className="h-5 w-px bg-border" />
             <Select defaultValue="1">
-              <SelectTrigger className="w-[320px] border-0 bg-transparent font-medium shadow-none">
+              <SelectTrigger className="w-full sm:w-[320px] border-0 bg-transparent font-medium shadow-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -26,7 +26,7 @@ export default function AppLayout() {
               </SelectContent>
             </Select>
           </header>
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-3 sm:p-6">
             <Outlet />
           </main>
         </div>
