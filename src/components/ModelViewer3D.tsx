@@ -1,11 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Text, RoundedBox } from "@react-three/drei";
+import { OrbitControls, Text } from "@react-three/drei";
 import type { QmStatus } from "@/data/mockData";
 import { qmPunkte } from "@/data/mockData";
 import { QmStatusBadge } from "./StatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -13,7 +13,10 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import * as THREE from "three";
+
+type Geschoss = "EG" | "OG1" | "Dach";
 
 interface BuildingElement {
   id: string;
@@ -21,36 +24,33 @@ interface BuildingElement {
   position: [number, number, number];
   size: [number, number, number];
   status: QmStatus;
+  geschoss: Geschoss;
 }
 
 const elements: BuildingElement[] = [
   // === EG (Erdgeschoss) ===
-  // Front wall (Z+)
-  { id: "AW_EG_01", label: "AW_EG_01", position: [-2.5, 1.4, 3], size: [4, 2.8, 0.2], status: "Freigegeben" },
-  { id: "AW_EG_02", label: "AW_EG_02", position: [2.5, 1.4, 3], size: [4, 2.8, 0.2], status: "In Bearbeitung" },
-  // Back wall (Z-)
-  { id: "AW_EG_03", label: "AW_EG_03", position: [-2.5, 1.4, -3], size: [4, 2.8, 0.2], status: "Freigegeben" },
-  { id: "AW_EG_04", label: "AW_EG_04", position: [2.5, 1.4, -3], size: [4, 2.8, 0.2], status: "Offen" },
-  // Left wall (X-)
-  { id: "AW_EG_05", label: "AW_EG_05", position: [-4.5, 1.4, 0], size: [0.2, 2.8, 6], status: "Freigegeben" },
-  // Right wall (X+)
-  { id: "AW_EG_06", label: "AW_EG_06", position: [4.5, 1.4, 0], size: [0.2, 2.8, 6], status: "Offen" },
-  // Inner wall EG
-  { id: "IW_EG_01", label: "IW_EG_01", position: [0, 1.4, 0], size: [0.16, 2.8, 5.6], status: "Freigegeben" },
-  // EG Ceiling
-  { id: "DE_EG_01", label: "DE_EG_01", position: [0, 2.85, 0], size: [9, 0.2, 6], status: "In Bearbeitung" },
+  { id: "AW_EG_01", label: "AW_EG_01", position: [-2.5, 1.4, 3], size: [4, 2.8, 0.2], status: "Freigegeben", geschoss: "EG" },
+  { id: "AW_EG_02", label: "AW_EG_02", position: [2.5, 1.4, 3], size: [4, 2.8, 0.2], status: "In Bearbeitung", geschoss: "EG" },
+  { id: "AW_EG_03", label: "AW_EG_03", position: [-2.5, 1.4, -3], size: [4, 2.8, 0.2], status: "Freigegeben", geschoss: "EG" },
+  { id: "AW_EG_04", label: "AW_EG_04", position: [2.5, 1.4, -3], size: [4, 2.8, 0.2], status: "Offen", geschoss: "EG" },
+  { id: "AW_EG_05", label: "AW_EG_05", position: [-4.5, 1.4, 0], size: [0.2, 2.8, 6], status: "Freigegeben", geschoss: "EG" },
+  { id: "AW_EG_06", label: "AW_EG_06", position: [4.5, 1.4, 0], size: [0.2, 2.8, 6], status: "Offen", geschoss: "EG" },
+  { id: "IW_EG_01", label: "IW_EG_01", position: [0, 1.4, 0], size: [0.16, 2.8, 5.6], status: "Freigegeben", geschoss: "EG" },
+  { id: "DE_EG_01", label: "DE_EG_01", position: [0, 2.85, 0], size: [9, 0.2, 6], status: "In Bearbeitung", geschoss: "EG" },
 
   // === OG1 (Obergeschoss 1) ===
-  // Front wall (Z+)
-  { id: "AW_OG1_01", label: "AW_OG1_01", position: [-2.5, 4.25, 3], size: [4, 2.6, 0.2], status: "Offen" },
-  { id: "AW_OG1_02", label: "AW_OG1_02", position: [2.5, 4.25, 3], size: [4, 2.6, 0.2], status: "In Bearbeitung" },
-  // Back wall (Z-)
-  { id: "AW_OG1_03", label: "AW_OG1_03", position: [-2.5, 4.25, -3], size: [4, 2.6, 0.2], status: "In Bearbeitung" },
-  { id: "AW_OG1_04", label: "AW_OG1_04", position: [2.5, 4.25, -3], size: [4, 2.6, 0.2], status: "Freigegeben" },
-  // Left wall (X-)
-  { id: "AW_OG1_05", label: "AW_OG1_05", position: [-4.5, 4.25, 0], size: [0.2, 2.6, 6], status: "Offen" },
-  // Right wall (X+)
-  { id: "AW_OG1_06", label: "AW_OG1_06", position: [4.5, 4.25, 0], size: [0.2, 2.6, 6], status: "Freigegeben" },
+  { id: "AW_OG1_01", label: "AW_OG1_01", position: [-2.5, 4.25, 3], size: [4, 2.6, 0.2], status: "Offen", geschoss: "OG1" },
+  { id: "AW_OG1_02", label: "AW_OG1_02", position: [2.5, 4.25, 3], size: [4, 2.6, 0.2], status: "In Bearbeitung", geschoss: "OG1" },
+  { id: "AW_OG1_03", label: "AW_OG1_03", position: [-2.5, 4.25, -3], size: [4, 2.6, 0.2], status: "In Bearbeitung", geschoss: "OG1" },
+  { id: "AW_OG1_04", label: "AW_OG1_04", position: [2.5, 4.25, -3], size: [4, 2.6, 0.2], status: "Freigegeben", geschoss: "OG1" },
+  { id: "AW_OG1_05", label: "AW_OG1_05", position: [-4.5, 4.25, 0], size: [0.2, 2.6, 6], status: "Offen", geschoss: "OG1" },
+  { id: "AW_OG1_06", label: "AW_OG1_06", position: [4.5, 4.25, 0], size: [0.2, 2.6, 6], status: "Freigegeben", geschoss: "OG1" },
+
+  // === Dach (4 Dachflächen) ===
+  { id: "DA_01", label: "DA_01 (Vorne)", position: [0, 6.1, 2.1], size: [9.6, 0.15, 3.2], status: "Offen", geschoss: "Dach" },
+  { id: "DA_02", label: "DA_02 (Hinten)", position: [0, 6.1, -2.1], size: [9.6, 0.15, 3.2], status: "Freigegeben", geschoss: "Dach" },
+  { id: "DA_03", label: "DA_03 (Links)", position: [-4.3, 5.85, 0], size: [0.8, 0.15, 6.4], status: "In Bearbeitung", geschoss: "Dach" },
+  { id: "DA_04", label: "DA_04 (Rechts)", position: [4.3, 5.85, 0], size: [0.8, 0.15, 6.4], status: "Offen", geschoss: "Dach" },
 ];
 
 const statusColor = (s: QmStatus): string =>
@@ -71,10 +71,18 @@ function BuildingElement3D({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
+  // Tilt roof panels for a pitched roof effect
+  const rotation: [number, number, number] | undefined = useMemo(() => {
+    if (el.id === "DA_01") return [0.25, 0, 0]; // front tilted forward
+    if (el.id === "DA_02") return [-0.25, 0, 0]; // back tilted backward
+    return undefined;
+  }, [el.id]);
+
   return (
     <mesh
       ref={meshRef}
       position={el.position}
+      rotation={rotation}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -91,10 +99,9 @@ function BuildingElement3D({
     >
       <boxGeometry args={el.size} />
       <meshStandardMaterial
-        color={hovered ? statusColorHover(el.status) : statusColor(el.status)}
+        color={el.geschoss === "Dach" && !hovered && !selected ? "#8B7355" : (hovered ? statusColorHover(el.status) : statusColor(el.status))}
         transparent
-        opacity={selected ? 0.95 : hovered ? 0.85 : 0.6}
-        wireframe={false}
+        opacity={selected ? 0.95 : hovered ? 0.85 : el.geschoss === "Dach" ? 0.75 : 0.6}
       />
       {(hovered || selected) && (
         <Text
@@ -115,26 +122,40 @@ function BuildingElement3D({
 function Building({
   selected,
   onSelect,
+  visibleGeschosse,
 }: {
   selected: string | null;
   onSelect: (id: string | null) => void;
+  visibleGeschosse: Set<Geschoss>;
 }) {
+  const filteredElements = elements.filter((el) => visibleGeschosse.has(el.geschoss));
+
   return (
     <group>
-      {/* Foundation */}
+      {/* Foundation - always visible */}
       <mesh position={[0, -0.15, 0]}>
         <boxGeometry args={[10, 0.3, 7]} />
         <meshStandardMaterial color="#a8a29e" />
       </mesh>
 
       {/* Floor EG */}
-      <mesh position={[0, 0.05, 0]}>
-        <boxGeometry args={[9.4, 0.1, 6.4]} />
-        <meshStandardMaterial color="#d6cfc7" />
-      </mesh>
+      {visibleGeschosse.has("EG") && (
+        <mesh position={[0, 0.05, 0]}>
+          <boxGeometry args={[9.4, 0.1, 6.4]} />
+          <meshStandardMaterial color="#d6cfc7" />
+        </mesh>
+      )}
+
+      {/* Dach Ridge beam (Firstbalken) */}
+      {visibleGeschosse.has("Dach") && (
+        <mesh position={[0, 6.5, 0]}>
+          <boxGeometry args={[9.6, 0.2, 0.2]} />
+          <meshStandardMaterial color="#6B5B3E" />
+        </mesh>
+      )}
 
       {/* Elements */}
-      {elements.map((el) => (
+      {filteredElements.map((el) => (
         <BuildingElement3D
           key={el.id}
           el={el}
@@ -142,16 +163,6 @@ function Building({
           onSelect={() => onSelect(el.id === selected ? null : el.id)}
         />
       ))}
-
-      {/* Roof - Satteldach (gable roof) */}
-      <mesh position={[0, 5.55, 0]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[9.4, 0.15, 6.4]} />
-        <meshStandardMaterial color="#8B7355" />
-      </mesh>
-      <mesh position={[0, 6.5, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <coneGeometry args={[3.4, 1.8, 4]} />
-        <meshStandardMaterial color="#8B7355" transparent opacity={0.6} />
-      </mesh>
     </group>
   );
 }
@@ -189,19 +200,60 @@ function DetailPanel({
   );
 }
 
+const geschossLabels: Record<Geschoss, string> = {
+  EG: "Erdgeschoss",
+  OG1: "Obergeschoss 1",
+  Dach: "Dachgeschoss",
+};
+
 export default function ModelViewer3D() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [visibleGeschosse, setVisibleGeschosse] = useState<Set<Geschoss>>(
+    new Set(["EG", "OG1", "Dach"])
+  );
   const isMobile = useIsMobile();
   const relatedQm = selected
     ? qmPunkte.filter((q) => q.element === selected)
     : [];
 
+  const toggleGeschoss = (g: Geschoss) => {
+    setVisibleGeschosse((prev) => {
+      const next = new Set(prev);
+      if (next.has(g)) {
+        next.delete(g);
+      } else {
+        next.add(g);
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4 md:flex-row">
       <div className="flex-1 rounded-lg border bg-card p-2 sm:p-4">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">
-          3D-Gebäudeansicht – Drehen, Zoomen & Elemente anklicken
-        </p>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-medium text-muted-foreground">
+            3D-Gebäudeansicht – Drehen, Zoomen & Elemente anklicken
+          </p>
+          {/* Geschossfilter */}
+          <div className="flex flex-wrap gap-1">
+            {(Object.keys(geschossLabels) as Geschoss[]).map((g) => {
+              const active = visibleGeschosse.has(g);
+              return (
+                <Button
+                  key={g}
+                  variant={active ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 gap-1 text-xs"
+                  onClick={() => toggleGeschoss(g)}
+                >
+                  {active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                  {g}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
         <div className="h-[300px] sm:h-[400px] w-full">
           <Canvas
             camera={{ position: [12, 8, 12], fov: 45 }}
@@ -210,7 +262,11 @@ export default function ModelViewer3D() {
             <ambientLight intensity={0.6} />
             <directionalLight position={[10, 10, 5]} intensity={0.8} />
             <directionalLight position={[-5, 5, -5]} intensity={0.3} />
-            <Building selected={selected} onSelect={setSelected} />
+            <Building
+              selected={selected}
+              onSelect={setSelected}
+              visibleGeschosse={visibleGeschosse}
+            />
             <OrbitControls
               enablePan={true}
               enableZoom={true}
