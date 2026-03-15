@@ -122,14 +122,14 @@ function Building({
   return (
     <group>
       {/* Foundation */}
-      <mesh position={[1, -0.15, 0]}>
-        <boxGeometry args={[14, 0.3, 5.5]} />
+      <mesh position={[0, -0.15, 0]}>
+        <boxGeometry args={[10, 0.3, 7]} />
         <meshStandardMaterial color="#a8a29e" />
       </mesh>
 
       {/* Floor EG */}
-      <mesh position={[1, 0.05, 0]}>
-        <boxGeometry args={[13.5, 0.1, 5]} />
+      <mesh position={[0, 0.05, 0]}>
+        <boxGeometry args={[9.4, 0.1, 6.4]} />
         <meshStandardMaterial color="#d6cfc7" />
       </mesh>
 
