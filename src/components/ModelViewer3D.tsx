@@ -143,10 +143,14 @@ function Building({
         />
       ))}
 
-      {/* Roof */}
-      <mesh position={[1, 6.2, 0]} rotation={[0, 0, 0]}>
-        <coneGeometry args={[8, 1.5, 4]} />
-        <meshStandardMaterial color="#8B7355" transparent opacity={0.5} />
+      {/* Roof - Satteldach (gable roof) */}
+      <mesh position={[0, 5.55, 0]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[9.4, 0.15, 6.4]} />
+        <meshStandardMaterial color="#8B7355" />
+      </mesh>
+      <mesh position={[0, 6.5, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <coneGeometry args={[3.4, 1.8, 4]} />
+        <meshStandardMaterial color="#8B7355" transparent opacity={0.6} />
       </mesh>
     </group>
   );
