@@ -24,22 +24,33 @@ interface BuildingElement {
 }
 
 const elements: BuildingElement[] = [
-  // EG Walls
-  { id: "AW_EG_01", label: "AW_EG_01", position: [-3.5, 1.4, 2], size: [3.6, 2.8, 0.2], status: "Freigegeben" },
-  { id: "AW_EG_02", label: "AW_EG_02", position: [0.4, 1.4, 2], size: [4.2, 2.8, 0.2], status: "Freigegeben" },
-  { id: "AW_EG_03", label: "AW_EG_03", position: [4.5, 1.4, 2], size: [3.9, 2.8, 0.2], status: "In Bearbeitung" },
-  { id: "AW_EG_04", label: "AW_EG_04", position: [-3.5, 1.4, -2], size: [5.1, 2.8, 0.2], status: "Offen" },
-  { id: "AW_EG_05", label: "AW_EG_05", position: [2, 1.4, -2], size: [3.3, 2.8, 0.2], status: "Freigegeben" },
-  { id: "AW_EG_06", label: "AW_EG_06", position: [5.5, 1.4, -2], size: [4.5, 2.8, 0.2], status: "Offen" },
-  // EG Ceilings
-  { id: "DE_EG_01", label: "DE_EG_01", position: [-2, 2.85, 0], size: [6, 0.24, 4], status: "Offen" },
-  { id: "DE_EG_02", label: "DE_EG_02", position: [4, 2.85, 0], size: [5.4, 0.24, 4], status: "In Bearbeitung" },
-  // Inner wall
-  { id: "IW_EG_01", label: "IW_EG_01", position: [1, 1.4, 0], size: [0.16, 2.8, 3], status: "Freigegeben" },
-  // OG1 Walls
-  { id: "AW_OG1_01", label: "AW_OG1_01", position: [-3.5, 4.3, 2], size: [3.6, 2.6, 0.2], status: "Offen" },
-  { id: "AW_OG1_02", label: "AW_OG1_02", position: [0.4, 4.3, 2], size: [4.2, 2.6, 0.2], status: "In Bearbeitung" },
-  { id: "AW_OG1_03", label: "AW_OG1_03", position: [4.5, 4.3, 2], size: [3.9, 2.6, 0.2], status: "Offen" },
+  // === EG (Erdgeschoss) ===
+  // Front wall (Z+)
+  { id: "AW_EG_01", label: "AW_EG_01", position: [-2.5, 1.4, 3], size: [4, 2.8, 0.2], status: "Freigegeben" },
+  { id: "AW_EG_02", label: "AW_EG_02", position: [2.5, 1.4, 3], size: [4, 2.8, 0.2], status: "In Bearbeitung" },
+  // Back wall (Z-)
+  { id: "AW_EG_03", label: "AW_EG_03", position: [-2.5, 1.4, -3], size: [4, 2.8, 0.2], status: "Freigegeben" },
+  { id: "AW_EG_04", label: "AW_EG_04", position: [2.5, 1.4, -3], size: [4, 2.8, 0.2], status: "Offen" },
+  // Left wall (X-)
+  { id: "AW_EG_05", label: "AW_EG_05", position: [-4.5, 1.4, 0], size: [0.2, 2.8, 6], status: "Freigegeben" },
+  // Right wall (X+)
+  { id: "AW_EG_06", label: "AW_EG_06", position: [4.5, 1.4, 0], size: [0.2, 2.8, 6], status: "Offen" },
+  // Inner wall EG
+  { id: "IW_EG_01", label: "IW_EG_01", position: [0, 1.4, 0], size: [0.16, 2.8, 5.6], status: "Freigegeben" },
+  // EG Ceiling
+  { id: "DE_EG_01", label: "DE_EG_01", position: [0, 2.85, 0], size: [9, 0.2, 6], status: "In Bearbeitung" },
+
+  // === OG1 (Obergeschoss 1) ===
+  // Front wall (Z+)
+  { id: "AW_OG1_01", label: "AW_OG1_01", position: [-2.5, 4.25, 3], size: [4, 2.6, 0.2], status: "Offen" },
+  { id: "AW_OG1_02", label: "AW_OG1_02", position: [2.5, 4.25, 3], size: [4, 2.6, 0.2], status: "In Bearbeitung" },
+  // Back wall (Z-)
+  { id: "AW_OG1_03", label: "AW_OG1_03", position: [-2.5, 4.25, -3], size: [4, 2.6, 0.2], status: "In Bearbeitung" },
+  { id: "AW_OG1_04", label: "AW_OG1_04", position: [2.5, 4.25, -3], size: [4, 2.6, 0.2], status: "Freigegeben" },
+  // Left wall (X-)
+  { id: "AW_OG1_05", label: "AW_OG1_05", position: [-4.5, 4.25, 0], size: [0.2, 2.6, 6], status: "Offen" },
+  // Right wall (X+)
+  { id: "AW_OG1_06", label: "AW_OG1_06", position: [4.5, 4.25, 0], size: [0.2, 2.6, 6], status: "Freigegeben" },
 ];
 
 const statusColor = (s: QmStatus): string =>
@@ -111,14 +122,14 @@ function Building({
   return (
     <group>
       {/* Foundation */}
-      <mesh position={[1, -0.15, 0]}>
-        <boxGeometry args={[14, 0.3, 5.5]} />
+      <mesh position={[0, -0.15, 0]}>
+        <boxGeometry args={[10, 0.3, 7]} />
         <meshStandardMaterial color="#a8a29e" />
       </mesh>
 
       {/* Floor EG */}
-      <mesh position={[1, 0.05, 0]}>
-        <boxGeometry args={[13.5, 0.1, 5]} />
+      <mesh position={[0, 0.05, 0]}>
+        <boxGeometry args={[9.4, 0.1, 6.4]} />
         <meshStandardMaterial color="#d6cfc7" />
       </mesh>
 
@@ -132,10 +143,14 @@ function Building({
         />
       ))}
 
-      {/* Roof */}
-      <mesh position={[1, 6.2, 0]} rotation={[0, 0, 0]}>
-        <coneGeometry args={[8, 1.5, 4]} />
-        <meshStandardMaterial color="#8B7355" transparent opacity={0.5} />
+      {/* Roof - Satteldach (gable roof) */}
+      <mesh position={[0, 5.55, 0]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[9.4, 0.15, 6.4]} />
+        <meshStandardMaterial color="#8B7355" />
+      </mesh>
+      <mesh position={[0, 6.5, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <coneGeometry args={[3.4, 1.8, 4]} />
+        <meshStandardMaterial color="#8B7355" transparent opacity={0.6} />
       </mesh>
     </group>
   );
