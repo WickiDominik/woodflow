@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { qmPunkte } from "@/data/mockData";
+import { useAktivesProjekt } from "@/context/ProjektContext";
+import { useQmPunkte } from "@/data/repository";
 import { QmStatusBadge } from "@/components/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +13,8 @@ export default function QmQualitaet() {
   const [bereichFilter, setBereichFilter] = useState<string>("alle");
   const [statusFilter, setStatusFilter] = useState<string>("alle");
   const isMobile = useIsMobile();
+  const { projekt } = useAktivesProjekt();
+  const { data: qmPunkte = [] } = useQmPunkte(projekt?.id);
 
   const filtered = qmPunkte.filter((q) => {
     if (bereichFilter !== "alle" && q.bereich !== bereichFilter) return false;

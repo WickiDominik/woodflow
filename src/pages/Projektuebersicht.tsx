@@ -1,18 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import { projekte } from "@/data/mockData";
+import { useAktivesProjekt } from "@/context/ProjektContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 
 export default function Projektuebersicht() {
   const navigate = useNavigate();
+  const { projekte, setProjektId, laedt } = useAktivesProjekt();
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold">Projektübersicht</h1>
+      {laedt && <p className="text-sm text-muted-foreground">Lade Projekte …</p>}
+      {!laedt && projekte.length === 0 && (
+        <p className="text-sm text-muted-foreground">Noch keine Projekte erfasst.</p>
+      )}
       <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
         {projekte.map((p) => (
-          <Card key={p.id} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => navigate("/dashboard")}>
+          <Card key={p.id} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => {
+            setProjektId(p.id);
+            navigate("/dashboard");
+          }}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{p.nummer} – {p.name}</CardTitle>
