@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAktivesProjekt } from "@/context/ProjektContext";
-import { istDemoModus } from "@/integrations/supabase/client";
+import { istDemoModus } from "@/integrations/supabase/modus";
 import { useAuth } from "@/auth/AuthProvider";
 
 export default function AppLayout() {
