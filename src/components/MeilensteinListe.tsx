@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { istDemoModus } from "@/integrations/supabase/client";
+import { istDemoModus } from "@/integrations/supabase/modus";
 import { useAuth } from "@/auth/AuthProvider";
 import { useMeilensteinErledigt, useMeilensteine, useProduktionsstartSetzen, type Projekt } from "@/data/repository";
 import {
