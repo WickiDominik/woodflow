@@ -13,6 +13,9 @@ import Fertigstellung from "@/pages/Fertigstellung";
 import QmQualitaet from "@/pages/QmQualitaet";
 import Dateiablage from "@/pages/Dateiablage";
 import NotFound from "./pages/NotFound";
+import Login from "@/pages/Login";
+import { AuthProvider, RequireAuth } from "@/auth/AuthProvider";
+import { ProjektProvider } from "@/context/ProjektContext";
 
 const queryClient = new QueryClient();
 
@@ -22,8 +25,18 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AuthProvider>
         <Routes>
-          <Route element={<AppLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route
+            element={
+              <RequireAuth>
+                <ProjektProvider>
+                  <AppLayout />
+                </ProjektProvider>
+              </RequireAuth>
+            }
+          >
             <Route path="/" element={<Projektuebersicht />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/avor" element={<Avor />} />
@@ -35,6 +48,7 @@ const App = () => (
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -1,10 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { produktionsElemente } from "@/data/mockData";
-import { QmStatusBadge } from "@/components/StatusBadge";
+import { ElementStatusBadge } from "@/components/StatusBadge";
+import { useAktivesProjekt } from "@/context/ProjektContext";
+import { useElemente } from "@/data/repository";
+
+const meter = (mm: number | null) => (mm == null ? "–" : `${(mm / 1000).toFixed(2)}m`);
 import ModelViewer3D from "@/components/ModelViewer3D";
 
 export default function Produktion() {
+  const { projekt } = useAktivesProjekt();
+  const { data: elemente = [], isLoading } = useElemente(projekt?.id);
   return (
     <div>
       <h1 className="mb-4 text-2xl font-bold">Produktion</h1>
@@ -35,29 +40,34 @@ export default function Produktion() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {produktionsElemente.map((el) => (
+                {elemente.map((el) => (
                   <TableRow key={el.id}>
-                    <TableCell className="font-medium">{el.bezeichnung}</TableCell>
-                    <TableCell>{el.typ}</TableCell>
-                    <TableCell>{el.geschoss}</TableCell>
-                    <TableCell>{el.laenge}</TableCell>
-                    <TableCell>{el.hoehe}</TableCell>
-                    <TableCell><QmStatusBadge status={el.status} /></TableCell>
+                    <TableCell className="font-medium">{el.baugruppe}</TableCell>
+                    <TableCell>{el.typ ?? "–"}</TableCell>
+                    <TableCell>{el.geschoss ?? "–"}</TableCell>
+                    <TableCell>{meter(el.laenge_mm)}</TableCell>
+                    <TableCell>{meter(el.hoehe_mm)}</TableCell>
+                    <TableCell><ElementStatusBadge status={el.status} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            {!isLoading && elemente.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">
+                Noch keine Elemente. Sie werden in Phase 2 direkt aus dem Toolcenter übernommen.
+              </p>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="elementplaene" className="mt-4">
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-            {produktionsElemente.slice(0, 6).map((el) => (
+            {elemente.slice(0, 6).map((el) => (
               <div key={el.id} className="flex items-center gap-3 rounded-lg border p-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted text-xs font-medium text-muted-foreground">PDF</div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{el.bezeichnung}_Plan</p>
-                  <p className="text-xs text-muted-foreground">{el.typ} · {el.geschoss}</p>
+                  <p className="text-sm font-medium truncate">{el.baugruppe}_Plan</p>
+                  <p className="text-xs text-muted-foreground">{el.typ ?? "–"} · {el.geschoss ?? "–"}</p>
                 </div>
               </div>
             ))}

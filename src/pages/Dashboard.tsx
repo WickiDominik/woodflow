@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { projekte } from "@/data/mockData";
+import { useAktivesProjekt } from "@/context/ProjektContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Eye, Box } from "lucide-react";
 
-const projekt = projekte[0];
-
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { projekt } = useAktivesProjekt();
+  if (!projekt) return <p className="text-sm text-muted-foreground">Kein Projekt ausgewählt.</p>;
 
   return (
     <div>

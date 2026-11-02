@@ -1,15 +1,21 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ModelViewer3D from "@/components/ModelViewer3D";
+import { MeilensteinListe } from "@/components/MeilensteinListe";
+import { ElementStatusBadge } from "@/components/StatusBadge";
+import { useAktivesProjekt } from "@/context/ProjektContext";
+import { useElemente } from "@/data/repository";
 
 export default function Avor() {
+  const { projekt } = useAktivesProjekt();
+  const { data: elemente = [] } = useElemente(projekt?.id);
   return (
     <div>
       <h1 className="mb-4 text-2xl font-bold">AVOR</h1>
-      <Tabs defaultValue="modell">
+      <Tabs defaultValue="terminprogramm">
         <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="modell">Modell</TabsTrigger>
-          <TabsTrigger value="terminprogramm">Terminprogramm</TabsTrigger>
+          <TabsTrigger value="terminprogramm">Meilensteine</TabsTrigger>
           <TabsTrigger value="listen">Listen</TabsTrigger>
           <TabsTrigger value="plaene">Pläne</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
@@ -22,31 +28,7 @@ export default function Avor() {
         </TabsContent>
 
         <TabsContent value="terminprogramm" className="mt-4">
-          <div className="rounded-lg border bg-card p-4">
-            <p className="mb-3 text-sm font-medium text-muted-foreground">Terminprogramm (Gantt-Ansicht)</p>
-            <div className="space-y-2">
-              {[
-                { label: "Planung & AVOR", start: 0, width: 30, color: "bg-primary" },
-                { label: "Elementproduktion", start: 20, width: 35, color: "bg-primary/70" },
-                { label: "Transport", start: 50, width: 10, color: "bg-muted-foreground/40" },
-                { label: "Montage", start: 55, width: 25, color: "bg-primary/50" },
-                { label: "Fertigstellung", start: 75, width: 20, color: "bg-muted-foreground/30" },
-              ].map((bar) => (
-                <div key={bar.label} className="flex items-center gap-3">
-                  <span className="w-28 sm:w-40 text-xs sm:text-sm text-muted-foreground truncate">{bar.label}</span>
-                  <div className="relative h-6 flex-1 rounded bg-muted">
-                    <div
-                      className={`absolute h-full rounded ${bar.color}`}
-                      style={{ left: `${bar.start}%`, width: `${bar.width}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-              <span>KW 01</span><span>KW 10</span><span>KW 20</span><span>KW 30</span><span>KW 40</span>
-            </div>
-          </div>
+          {projekt ? <MeilensteinListe key={projekt.id} projekt={projekt} /> : null}
         </TabsContent>
 
         <TabsContent value="listen" className="mt-4">
@@ -55,22 +37,29 @@ export default function Avor() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Element</TableHead>
+                  <TableHead>Bauuntergruppe</TableHead>
                   <TableHead>Typ</TableHead>
                   <TableHead>Geschoss</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {["AW_EG_01", "AW_EG_02", "AW_EG_03", "DE_EG_01", "IW_EG_01"].map((el) => (
-                  <TableRow key={el}>
-                    <TableCell className="font-medium">{el}</TableCell>
-                    <TableCell>{el.startsWith("AW") ? "Aussenwand" : el.startsWith("DE") ? "Decke" : "Innenwand"}</TableCell>
-                    <TableCell>EG</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">Bereit</TableCell>
+                {elemente.map((el) => (
+                  <TableRow key={el.id}>
+                    <TableCell className="font-medium">{el.baugruppe}</TableCell>
+                    <TableCell>{el.bauuntergruppe}</TableCell>
+                    <TableCell>{el.typ ?? "–"}</TableCell>
+                    <TableCell>{el.geschoss ?? "–"}</TableCell>
+                    <TableCell><ElementStatusBadge status={el.status} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            {elemente.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">
+                Noch keine Elemente. Sie werden in Phase 2 direkt aus dem Toolcenter übernommen.
+              </p>
+            )}
           </div>
         </TabsContent>
 
