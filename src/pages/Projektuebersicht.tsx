@@ -4,14 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { AblageKarte } from "@/components/AblageKarte";
+import { NeuesProjektDialog } from "@/components/NeuesProjektDialog";
+import { useAuth } from "@/auth/AuthProvider";
 
 export default function Projektuebersicht() {
   const navigate = useNavigate();
+  const { rollen } = useAuth();
+  const darfAnlegen = rollen.some((r) => r === "admin" || r === "projektleitung" || r === "avor");
   const { projekte, projekt, setProjektId, laedt } = useAktivesProjekt();
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Projektübersicht</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">Projektübersicht</h1>
+        {darfAnlegen && <NeuesProjektDialog onAngelegt={setProjektId} />}
+      </div>
       {laedt && <p className="text-sm text-muted-foreground">Lade Projekte …</p>}
       {!laedt && projekte.length === 0 && (
         <p className="text-sm text-muted-foreground">Noch keine Projekte erfasst.</p>
