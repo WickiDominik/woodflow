@@ -2,6 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders as baseCors } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3'
 import { createHash, timingSafeEqual } from 'node:crypto'
+import { NUMMER_RE, projektFindenOderAnlegen } from '../_shared/projekt.ts'
 
 const corsHeaders = {
   ...baseCors,
@@ -86,15 +87,14 @@ Deno.serve(async (req) => {
     seen.add(e.baugruppe)
   }
 
+  if (!NUMMER_RE.test(projekt.nummer)) {
+    return json({ error: `Projektnummer ${projekt.nummer} hat nicht das Format JJ.NNNN.` }, 400)
+  }
+
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
   try {
-    const { data: p, error: pErr } = await supabase
-      .from('projekte').select('id').eq('nummer', projekt.nummer).maybeSingle()
-    if (pErr) throw pErr
-    if (!p) {
-      return json({ error: `Projekt ${projekt.nummer} ist in Woodflow nicht erfasst. Bitte zuerst in Woodflow anlegen.` }, 404)
-    }
+    const p = await projektFindenOderAnlegen(supabase, projekt.nummer, projekt.name)
 
     const { data: existing, error: eErr } = await supabase
       .from('elemente').select('id, baugruppe, ' + FIELDS.join(', ')).eq('projekt_id', p.id)
@@ -140,6 +140,7 @@ Deno.serve(async (req) => {
 
     return json({
       projekt_id: p.id,
+      projekt_neu: p.neu,
       neu: inserts.length,
       aktualisiert: updates.length,
       unveraendert,

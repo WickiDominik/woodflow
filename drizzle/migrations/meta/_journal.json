@@ -8,6 +8,13 @@
       "when": 1793713964249,
       "tag": "0000_ablage_pruefungen",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793714451888,
+      "tag": "0001_projekt_meilensteine_trigger",
+      "breakpoints": true
     }
   ]
 }
