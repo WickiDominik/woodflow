@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 
 export default function Projektuebersicht() {
   const navigate = useNavigate();
-  const { projekte, setProjektId, laedt } = useAktivesProjekt();
+  const { projekte, projekt, setProjektId, laedt } = useAktivesProjekt();
 
   return (
     <div>
@@ -14,6 +14,12 @@ export default function Projektuebersicht() {
       {laedt && <p className="text-sm text-muted-foreground">Lade Projekte …</p>}
       {!laedt && projekte.length === 0 && (
         <p className="text-sm text-muted-foreground">Noch keine Projekte erfasst.</p>
+      )}
+      {projekt && (
+        <div className="mb-6">
+          <p className="mb-2 text-sm text-muted-foreground">Ausgewähltes Projekt: {projekt.nummer} – {projekt.name}</p>
+          <AblageKarte projektId={projekt.id} />
+        </div>
       )}
       <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
         {projekte.map((p) => (
