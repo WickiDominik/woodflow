@@ -3,6 +3,7 @@ import { useAktivesProjekt } from "@/context/ProjektContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
+import { AblageKarte } from "@/components/AblageKarte";
 
 export default function Projektuebersicht() {
   const navigate = useNavigate();
