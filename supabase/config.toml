@@ -1,3 +1,5 @@
 project_id = "nygusgagsszlllrjncmr"
 [functions.toolcenter-import]
 verify_jwt = false
+[functions.toolcenter-pruefung]
+verify_jwt = false
