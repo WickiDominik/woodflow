@@ -234,3 +234,48 @@ export function useProduktionsstartSetzen(projektId: string | undefined) {
 
 /** Dateiablage bleibt bis zur Anbindung von Windream/Nextcloud bei den Beispieldaten. */
 export const dateiablage = mockDateiablage;
+
+// ------------------------------------------------------------------ Ablage-Prüfungen (Toolcenter)
+
+export interface AblagePunkt {
+  gruppe: string | null;
+  pruefung: string | null;
+  status: string | null;
+  hinweis: string | null;
+}
+
+export interface AblagePruefung {
+  id: string;
+  bereich: "produktion" | "montage";
+  status: string;
+  anzahl_ok: number;
+  anzahl_offen: number;
+  punkte: AblagePunkt[];
+  benutzer: string | null;
+  created_at: string;
+}
+
+/** Neueste Toolcenter-Prüfung je Bereich. */
+export function useAblagePruefungen(projektId: string | undefined) {
+  return useQuery({
+    queryKey: ["ablage_pruefungen", projektId],
+    enabled: !!projektId,
+    queryFn: async (): Promise<{ produktion: AblagePruefung | null; montage: AblagePruefung | null }> => {
+      if (!supabase) return { produktion: null, montage: null };
+      const holen = async (bereich: "produktion" | "montage") => {
+        const rows = pruefe(
+          await supabase
+            .from("ablage_pruefungen")
+            .select("id, bereich, status, anzahl_ok, anzahl_offen, punkte, benutzer, created_at")
+            .eq("projekt_id", projektId!)
+            .eq("bereich", bereich)
+            .order("created_at", { ascending: false })
+            .limit(1),
+        ) as unknown as AblagePruefung[];
+        return rows[0] ?? null;
+      };
+      const [produktion, montage] = await Promise.all([holen("produktion"), holen("montage")]);
+      return { produktion, montage };
+    },
+  });
+}

@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      ablage_pruefungen: {
+        Row: {
+          anzahl_offen: number
+          anzahl_ok: number
+          benutzer: string | null
+          bereich: string
+          created_at: string
+          id: string
+          modell: string | null
+          projekt_id: string
+          punkte: Json
+          status: string
+          version: string | null
+        }
+        Insert: {
+          anzahl_offen?: number
+          anzahl_ok?: number
+          benutzer?: string | null
+          bereich: string
+          created_at?: string
+          id?: string
+          modell?: string | null
+          projekt_id: string
+          punkte?: Json
+          status: string
+          version?: string | null
+        }
+        Update: {
+          anzahl_offen?: number
+          anzahl_ok?: number
+          benutzer?: string | null
+          bereich?: string
+          created_at?: string
+          id?: string
+          modell?: string | null
+          projekt_id?: string
+          punkte?: Json
+          status?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ablage_pruefungen_projekt_id_fkey"
+            columns: ["projekt_id"]
+            isOneToOne: false
+            referencedRelation: "projekte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       element_status_verlauf: {
         Row: {
           element_id: string
