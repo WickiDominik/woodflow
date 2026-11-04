@@ -310,6 +310,47 @@ export type Database = {
           },
         ]
       }
+      termine: {
+        Row: {
+          aufgabe: string
+          created_at: string
+          ende: string | null
+          id: string
+          projekt_id: string
+          reihenfolge: number
+          start: string
+          zustaendig: string | null
+        }
+        Insert: {
+          aufgabe: string
+          created_at?: string
+          ende?: string | null
+          id?: string
+          projekt_id: string
+          reihenfolge: number
+          start: string
+          zustaendig?: string | null
+        }
+        Update: {
+          aufgabe?: string
+          created_at?: string
+          ende?: string | null
+          id?: string
+          projekt_id?: string
+          reihenfolge?: number
+          start?: string
+          zustaendig?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "termine_projekt_id_fkey"
+            columns: ["projekt_id"]
+            isOneToOne: false
+            referencedRelation: "projekte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_rollen: {
         Row: {
           id: string

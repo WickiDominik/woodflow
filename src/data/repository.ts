@@ -279,3 +279,71 @@ export function useAblagePruefungen(projektId: string | undefined) {
     },
   });
 }
+
+// ------------------------------------------------------------------ Terminprogramm
+
+export interface TerminZeile {
+  id: string;
+  reihenfolge: number;
+  aufgabe: string;
+  zustaendig: string | null;
+  start: string;
+  ende: string | null;
+  created_at: string;
+}
+
+export function useTermine(projektId: string | undefined) {
+  return useQuery({
+    queryKey: ["termine", projektId],
+    enabled: !!projektId,
+    queryFn: async (): Promise<TerminZeile[]> => {
+      if (!supabase) return [];
+      return pruefe<TerminZeile[]>(
+        await supabase
+          .from("termine")
+          .select("id, reihenfolge, aufgabe, zustaendig, start, ende, created_at")
+          .eq("projekt_id", projektId!)
+          .order("reihenfolge"),
+      );
+    },
+  });
+}
+
+/** Ersetzt alle Termine des Projekts und setzt die Soll-Daten der gefundenen Meilensteine. */
+export function useTerminprogrammImport(projektId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      termine,
+      meilensteinDaten,
+    }: {
+      termine: { reihenfolge: number; aufgabe: string; zustaendig: string | null; start: string; ende: string | null }[];
+      meilensteinDaten: Partial<Record<string, string>>;
+    }) => {
+      if (!supabase) throw new Error("Im Demo-Modus wird nichts gespeichert.");
+      pruefe(await supabase.from("termine").delete().eq("projekt_id", projektId!));
+      if (termine.length) pruefe(await supabase.from("termine").insert(termine.map((t) => ({ ...t, projekt_id: projektId! }))));
+      let gesetzt = 0;
+      for (const [typ, datum] of Object.entries(meilensteinDaten)) {
+        if (!datum) continue;
+        pruefe(
+          await supabase
+            .from("meilensteine")
+            .update({ soll_datum: datum })
+            .eq("projekt_id", projektId!)
+            .eq("typ", typ as never),
+        );
+        gesetzt++;
+      }
+      if (meilensteinDaten.produktionsstart) {
+        pruefe(await supabase.from("projekte").update({ produktionsstart: meilensteinDaten.produktionsstart }).eq("id", projektId!));
+      }
+      return { termine: termine.length, meilensteine: gesetzt };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["termine", projektId] });
+      qc.invalidateQueries({ queryKey: ["meilensteine", projektId] });
+      qc.invalidateQueries({ queryKey: ["projekte"] });
+    },
+  });
+}
