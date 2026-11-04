@@ -6,6 +6,7 @@ import { ElementStatusBadge } from "@/components/StatusBadge";
 import { useAktivesProjekt } from "@/context/ProjektContext";
 import { useElemente } from "@/data/repository";
 import { AblageKarte } from "@/components/AblageKarte";
+import { TerminplanKarte } from "@/components/TerminplanKarte";
 
 export default function Avor() {
   const { projekt } = useAktivesProjekt();
@@ -14,6 +15,7 @@ export default function Avor() {
     <div>
       <h1 className="mb-4 text-2xl font-bold">AVOR</h1>
       {projekt && <div className="mb-4"><AblageKarte projektId={projekt.id} /></div>}
+      {projekt && <div className="mb-4"><TerminplanKarte key={projekt.id} projekt={projekt} /></div>}
       <Tabs defaultValue="terminprogramm">
         <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="modell">Modell</TabsTrigger>
