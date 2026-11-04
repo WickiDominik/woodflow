@@ -213,45 +213,72 @@ export type Database = {
       }
       projekte: {
         Row: {
+          architekt: string | null
+          architekt_email: string | null
+          architekt_telefon: string | null
+          bauherr: string | null
+          baustelle: string | null
           beschreibung: string | null
           created_at: string
           id: string
           name: string
+          nav_import_am: string | null
+          nav_status: string | null
           nextcloud_pfad: string | null
           nummer: string
           ort: string | null
           produktionsstart: string | null
+          projektleiter: string | null
           status: Database["public"]["Enums"]["status_ampel"]
           timbar_url: string | null
           updated_at: string
+          verkaeufer: string | null
           windream_pfad: string | null
         }
         Insert: {
+          architekt?: string | null
+          architekt_email?: string | null
+          architekt_telefon?: string | null
+          bauherr?: string | null
+          baustelle?: string | null
           beschreibung?: string | null
           created_at?: string
           id?: string
           name: string
+          nav_import_am?: string | null
+          nav_status?: string | null
           nextcloud_pfad?: string | null
           nummer: string
           ort?: string | null
           produktionsstart?: string | null
+          projektleiter?: string | null
           status?: Database["public"]["Enums"]["status_ampel"]
           timbar_url?: string | null
           updated_at?: string
+          verkaeufer?: string | null
           windream_pfad?: string | null
         }
         Update: {
+          architekt?: string | null
+          architekt_email?: string | null
+          architekt_telefon?: string | null
+          bauherr?: string | null
+          baustelle?: string | null
           beschreibung?: string | null
           created_at?: string
           id?: string
           name?: string
+          nav_import_am?: string | null
+          nav_status?: string | null
           nextcloud_pfad?: string | null
           nummer?: string
           ort?: string | null
           produktionsstart?: string | null
+          projektleiter?: string | null
           status?: Database["public"]["Enums"]["status_ampel"]
           timbar_url?: string | null
           updated_at?: string
+          verkaeufer?: string | null
           windream_pfad?: string | null
         }
         Relationships: []
