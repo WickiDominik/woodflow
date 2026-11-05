@@ -25,6 +25,15 @@ export interface Projekt {
   windream_pfad: string | null;
   nextcloud_pfad: string | null;
   timbar_url: string | null;
+  bauherr?: string | null;
+  architekt?: string | null;
+  architekt_telefon?: string | null;
+  architekt_email?: string | null;
+  baustelle?: string | null;
+  projektleiter?: string | null;
+  verkaeufer?: string | null;
+  nav_status?: string | null;
+  nav_import_am?: string | null;
   fortschritt: Fortschritt;
   qm: QmKennzahlen;
 }
@@ -110,12 +119,21 @@ interface ProjektRow {
   windream_pfad: string | null;
   nextcloud_pfad: string | null;
   timbar_url: string | null;
+  bauherr: string | null;
+  architekt: string | null;
+  architekt_telefon: string | null;
+  architekt_email: string | null;
+  baustelle: string | null;
+  projektleiter: string | null;
+  verkaeufer: string | null;
+  nav_status: string | null;
+  nav_import_am: string | null;
   elemente: { status: ElementStatus }[];
   qm_punkte: { status: QmStatus; prioritaet: "Hoch" | "Mittel" | "Niedrig" }[];
 }
 
 const PROJEKT_SELECT =
-  "id, nummer, name, beschreibung, ort, status, produktionsstart, windream_pfad, nextcloud_pfad, timbar_url, elemente(status), qm_punkte(status, prioritaet)";
+  "id, nummer, name, beschreibung, ort, status, produktionsstart, windream_pfad, nextcloud_pfad, timbar_url, bauherr, architekt, architekt_telefon, architekt_email, baustelle, projektleiter, verkaeufer, nav_status, nav_import_am, elemente(status), qm_punkte(status, prioritaet)";
 
 function zuProjekt(r: ProjektRow): Projekt {
   return {
@@ -129,6 +147,15 @@ function zuProjekt(r: ProjektRow): Projekt {
     windream_pfad: r.windream_pfad,
     nextcloud_pfad: r.nextcloud_pfad,
     timbar_url: r.timbar_url,
+    bauherr: r.bauherr,
+    architekt: r.architekt,
+    architekt_telefon: r.architekt_telefon,
+    architekt_email: r.architekt_email,
+    baustelle: r.baustelle,
+    projektleiter: r.projektleiter,
+    verkaeufer: r.verkaeufer,
+    nav_status: r.nav_status,
+    nav_import_am: r.nav_import_am,
     fortschritt: berechneFortschritt(r.elemente.map((e) => e.status)),
     qm: berechneQm(r.qm_punkte),
   };

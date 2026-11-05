@@ -13,7 +13,7 @@ function wb(blaetter: Record<string, unknown[][]>) {
 describe("parseNavProjektkarte", () => {
   const datei = wb({
     Allgemein: [["Nr.", "26.0138"], ["Beschreibung", " MFH Rickli Jordy "], ["Status", "Auftrag"], ["Projektleitername", "D. Wicki"], ["Auftragssumme", 100000]],
-    Baustelle: [["Lief. an Adresse", "Beundengässli 16"], ["Lief. an PLZ Code/Ort", "2564 Bellmund"], ["Lief. an Ort", "Bellmund"]],
+    Baustelle: [["Lief. an Adresse", "Beundengässli 16"], ["Lief. an PLZ Code/Ort", "2564"], ["Lief. an Ort", "Bellmund"]],
     Bauherr: [["Bauherr Name", "b.o.x. Immobilien"], ["Bauherr Ort", "Biel/Bienne"], ["Status", "anders"], ["Architekt Name", " "]],
   });
 
@@ -25,6 +25,9 @@ describe("parseNavProjektkarte", () => {
     expect(p.baustelle).toBe("Beundengässli 16, 2564 Bellmund");
     expect(p.ort).toBe("Bellmund");
     expect(p.projektleiter).toBe("D. Wicki");
+  });
+  it("Baustelle ohne PLZ", () => {
+    expect(parseNavProjektkarte(wb({ Allgemein: [["Nr.", "26.0138"], ["Lief. an Adresse", "Weg 1"], ["Lief. an Ort", "Bern"]] })).baustelle).toBe("Weg 1, Bern");
   });
   it("erste Fundstelle gewinnt", () => expect(parseNavProjektkarte(datei).nav_status).toBe("Auftrag"));
   it("Leerzeichen gilt als leer", () => expect(parseNavProjektkarte(datei).architekt).toBeNull());

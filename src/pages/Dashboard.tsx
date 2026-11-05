@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { ProjektdatenKarte } from "@/components/ProjektdatenKarte";
 import { ShieldCheck, Eye, Box } from "lucide-react";
 
 export default function Dashboard() {
@@ -61,6 +62,8 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      <ProjektdatenKarte projekt={projekt} />
 
       <div className="flex flex-wrap gap-3">
         <Button onClick={() => navigate("/avor")} variant="outline"><Eye className="mr-2 h-4 w-4" />Projekt öffnen</Button>
