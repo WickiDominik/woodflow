@@ -56,7 +56,7 @@ export function parseNavProjektkarte(wb: XLSX.WorkBook): NavProjektdaten {
     architekt: g("Architekt Name"),
     architekt_telefon: g("Architekt Telefon"),
     architekt_email: g("Architekt E-Mail"),
-    baustelle: verbinden([g("Lief. an Adresse"), g("Lief. an PLZ Code/Ort")], ", "),
+    baustelle: verbinden([g("Lief. an Adresse"), verbinden([g("Lief. an PLZ Code/Ort"), g("Lief. an Ort")], " ")], ", "),
     ort: g("Lief. an Ort"),
     projektleiter: g("Projektleitername"),
     verkaeufer: g("Name verantw. Verkäufer"),
