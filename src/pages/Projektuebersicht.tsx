@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { AblageKarte } from "@/components/AblageKarte";
+import { NavImportButton } from "@/components/NavImportButton";
 import { NeuesProjektDialog } from "@/components/NeuesProjektDialog";
 import { useAuth } from "@/auth/AuthProvider";
 
@@ -17,7 +18,12 @@ export default function Projektuebersicht() {
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Projektübersicht</h1>
-        {darfAnlegen && <NeuesProjektDialog onAngelegt={setProjektId} />}
+        {darfAnlegen && (
+          <div className="flex flex-wrap gap-2">
+            <NavImportButton onFertig={setProjektId} />
+            <NeuesProjektDialog onAngelegt={setProjektId} />
+          </div>
+        )}
       </div>
       {laedt && <p className="text-sm text-muted-foreground">Lade Projekte …</p>}
       {!laedt && projekte.length === 0 && (
