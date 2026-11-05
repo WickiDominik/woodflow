@@ -374,3 +374,42 @@ export function useTerminprogrammImport(projektId: string | undefined) {
     },
   });
 }
+
+// ------------------------------------------------------------------ Fristen
+
+import type { Frist } from "@/lib/fristen";
+
+const demoFristen = (): Frist[] => {
+  const plus = (t: number) => new Date(Date.now() + t * 86_400_000).toISOString().slice(0, 10);
+  const versatz = [-3, 4, 12, 30, 60];
+  return mockProjekte.flatMap((p, pi) =>
+    MEILENSTEIN_REIHENFOLGE.slice(3, 8).map((typ, i) => ({
+      id: `${p.id}-${typ}`, projekt_id: p.id, projekt_nummer: p.nummer, projekt_name: p.name,
+      typ, soll_datum: plus(versatz[i] + pi * 5), erledigt_am: null,
+    })),
+  );
+};
+
+/** Alle offenen Meilensteine mit Soll-Datum über alle Projekte. */
+export function useFristen() {
+  return useQuery({
+    queryKey: ["fristen"],
+    queryFn: async (): Promise<Frist[]> => {
+      if (!supabase) return demoFristen();
+      type Row = { id: string; projekt_id: string; typ: Frist["typ"]; soll_datum: string; erledigt_am: string | null;
+        projekte: { nummer: string; name: string } | { nummer: string; name: string }[] | null };
+      const rows = pruefe<Row[]>(
+        (await supabase
+          .from("meilensteine")
+          .select("id, projekt_id, typ, soll_datum, erledigt_am, projekte(nummer, name)")
+          .not("soll_datum", "is", null)
+          .is("erledigt_am", null)
+          .order("soll_datum")) as unknown as { data: Row[] | null; error: { message: string } | null },
+      );
+      return rows.map(({ projekte, ...m }) => {
+        const p = Array.isArray(projekte) ? projekte[0] : projekte;
+        return { ...m, projekt_nummer: p?.nummer ?? "", projekt_name: p?.name ?? "" };
+      });
+    },
+  });
+}

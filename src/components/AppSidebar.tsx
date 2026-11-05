@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   FolderOpen,
   TreePine,
+  CalendarClock,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -29,6 +30,7 @@ const items = [
   { title: "Produktion", url: "/produktion", icon: Factory },
   { title: "Montage", url: "/montage", icon: Truck },
   { title: "Fertigstellung", url: "/fertigstellung", icon: CheckCircle2 },
+  { title: "Fristen", url: "/fristen", icon: CalendarClock },
   { title: "QM / Qualität", url: "/qm", icon: ShieldCheck },
   { title: "Dateiablage", url: "/dateiablage", icon: FolderOpen },
 ];

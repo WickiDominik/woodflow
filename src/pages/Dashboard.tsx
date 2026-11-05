@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusAmpelDot } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { NaechsteFristenKarte } from "@/components/NaechsteFristenKarte";
 import { ProjektdatenKarte } from "@/components/ProjektdatenKarte";
 import { ShieldCheck, Eye, Box } from "lucide-react";
 
@@ -63,6 +64,7 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      <NaechsteFristenKarte projektId={projekt.id} />
       <ProjektdatenKarte projekt={projekt} />
 
       <div className="flex flex-wrap gap-3">
