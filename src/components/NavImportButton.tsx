@@ -32,7 +32,7 @@ export function NavImportButton({ onFertig }: { onFertig: (id: string) => void }
     setLaeuft(true);
     try {
       const d = parseNavProjektkarte(XLSX.read(await f.arrayBuffer(), { type: "array" }));
-      const update: Record<string, string> = {};
+      const update: Partial<Record<keyof NavProjektdaten | "nav_import_am", string>> = {};
       const labels: string[] = [];
       for (const { key, label } of FELDER) {
         const v = d[key];
