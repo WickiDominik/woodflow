@@ -12,6 +12,7 @@ import Montage from "@/pages/Montage";
 import Fertigstellung from "@/pages/Fertigstellung";
 import QmQualitaet from "@/pages/QmQualitaet";
 import Dateiablage from "@/pages/Dateiablage";
+import Fristen from "@/pages/Fristen";
 import NotFound from "./pages/NotFound";
 import Login from "@/pages/Login";
 import { AuthProvider, RequireAuth } from "@/auth/AuthProvider";
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/fertigstellung" element={<Fertigstellung />} />
             <Route path="/qm" element={<QmQualitaet />} />
             <Route path="/dateiablage" element={<Dateiablage />} />
+            <Route path="/fristen" element={<Fristen />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
