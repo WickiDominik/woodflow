@@ -177,7 +177,7 @@ export function useProjekte() {
 
 // Demo-Modus: Statusänderungen nur im Speicher.
 let demoElementeSpeicher: Element[] | null = null;
-const demoVerlauf: VerlaufEintrag[] = [];
+const demoVerlauf: (VerlaufEintrag & { element_id: string })[] = [];
 const holeDemoElemente = () => (demoElementeSpeicher ??= demoElemente());
 
 export interface VerlaufEintrag {
@@ -214,7 +214,7 @@ export function useElementStatusSetzen(projektId: string | undefined) {
         for (const e of holeDemoElemente()) {
           if (ids.includes(e.id) && e.status !== status) {
             e.status = status;
-            demoVerlauf.push({ id: `${e.id}-${jetzt}`, status, geaendert_am: jetzt, benutzer: "Demo", element_id: e.id } as VerlaufEintrag);
+            demoVerlauf.push({ id: `${e.id}-${jetzt}`, status, geaendert_am: jetzt, benutzer: "Demo", element_id: e.id });
           }
         }
         return ids.length;
@@ -237,7 +237,7 @@ export function useElementVerlauf(elementId: string | undefined) {
     enabled: !!elementId,
     queryFn: async (): Promise<VerlaufEintrag[]> => {
       if (!supabase)
-        return demoVerlauf.filter((v) => (v as VerlaufEintrag & { element_id: string }).element_id === elementId).reverse();
+        return demoVerlauf.filter((v) => v.element_id === elementId).reverse();
       const rows = pruefe(
         await supabase
           .from("element_status_verlauf")
