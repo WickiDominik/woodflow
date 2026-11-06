@@ -1,10 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ElementStatusBadge } from "@/components/StatusBadge";
 import { useAktivesProjekt } from "@/context/ProjektContext";
 import { useElemente } from "@/data/repository";
-
-const meter = (mm: number | null) => (mm == null ? "–" : `${(mm / 1000).toFixed(2)}m`);
+import ElementTabelle from "@/components/ElementTabelle";
 import ModelViewer3D from "@/components/ModelViewer3D";
 
 export default function Produktion() {
@@ -27,37 +25,7 @@ export default function Produktion() {
         <TabsContent value="modell" className="mt-4"><ModelViewer3D /></TabsContent>
 
         <TabsContent value="details" className="mt-4">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Element</TableHead>
-                  <TableHead>Typ</TableHead>
-                  <TableHead>Geschoss</TableHead>
-                  <TableHead>Länge</TableHead>
-                  <TableHead>Höhe</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {elemente.map((el) => (
-                  <TableRow key={el.id}>
-                    <TableCell className="font-medium">{el.baugruppe}</TableCell>
-                    <TableCell>{el.typ ?? "–"}</TableCell>
-                    <TableCell>{el.geschoss ?? "–"}</TableCell>
-                    <TableCell>{meter(el.laenge_mm)}</TableCell>
-                    <TableCell>{meter(el.hoehe_mm)}</TableCell>
-                    <TableCell><ElementStatusBadge status={el.status} /></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {!isLoading && elemente.length === 0 && (
-              <p className="p-4 text-sm text-muted-foreground">
-                Noch keine Elemente. Sie werden in Phase 2 direkt aus dem Toolcenter übernommen.
-              </p>
-            )}
-          </div>
+          <ElementTabelle projektId={projekt?.id} elemente={elemente} isLoading={isLoading} />
         </TabsContent>
 
         <TabsContent value="elementplaene" className="mt-4">
