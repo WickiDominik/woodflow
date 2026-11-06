@@ -46,6 +46,7 @@ export interface Element {
   geschoss: string | null;
   laenge_mm: number | null;
   hoehe_mm: number | null;
+  breite_mm?: number | null;
   status: ElementStatus;
 }
 
@@ -174,19 +175,84 @@ export function useProjekte() {
   });
 }
 
+// Demo-Modus: Statusänderungen nur im Speicher.
+let demoElementeSpeicher: Element[] | null = null;
+const demoVerlauf: VerlaufEintrag[] = [];
+const holeDemoElemente = () => (demoElementeSpeicher ??= demoElemente());
+
+export interface VerlaufEintrag {
+  id: string;
+  status: ElementStatus;
+  geaendert_am: string;
+  benutzer: string | null;
+}
+
 export function useElemente(projektId: string | undefined) {
   return useQuery({
     queryKey: ["elemente", projektId],
     enabled: !!projektId,
     queryFn: async (): Promise<Element[]> => {
-      if (!supabase) return projektId === "1" ? demoElemente() : [];
+      if (!supabase) return projektId === "1" ? holeDemoElemente().map((e) => ({ ...e })) : [];
       return pruefe<Element[]>(
         await supabase
           .from("elemente")
-          .select("id, baugruppe, bauuntergruppe, typ, geschoss, laenge_mm, hoehe_mm, status")
+          .select("id, baugruppe, bauuntergruppe, typ, geschoss, laenge_mm, hoehe_mm, breite_mm, status")
           .eq("projekt_id", projektId!)
           .order("baugruppe"),
       );
+    },
+  });
+}
+
+/** Status mehrerer Elemente setzen. Der Verlauf wird vom DB-Trigger elemente_status_log geschrieben. */
+export function useElementStatusSetzen(projektId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: ElementStatus }) => {
+      if (!supabase) {
+        const jetzt = new Date().toISOString();
+        for (const e of holeDemoElemente()) {
+          if (ids.includes(e.id) && e.status !== status) {
+            e.status = status;
+            demoVerlauf.push({ id: `${e.id}-${jetzt}`, status, geaendert_am: jetzt, benutzer: "Demo", element_id: e.id } as VerlaufEintrag);
+          }
+        }
+        return ids.length;
+      }
+      const rows = pruefe(await supabase.from("elemente").update({ status }).in("id", ids).select("id"));
+      if ((rows as unknown[]).length !== ids.length) throw new Error("Nicht alle Elemente konnten geändert werden (fehlende Berechtigung?).");
+      return ids.length;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["elemente", projektId] });
+      qc.invalidateQueries({ queryKey: ["element_verlauf"] });
+      qc.invalidateQueries({ queryKey: ["projekte"] });
+    },
+  });
+}
+
+export function useElementVerlauf(elementId: string | undefined) {
+  return useQuery({
+    queryKey: ["element_verlauf", elementId],
+    enabled: !!elementId,
+    queryFn: async (): Promise<VerlaufEintrag[]> => {
+      if (!supabase)
+        return demoVerlauf.filter((v) => (v as VerlaufEintrag & { element_id: string }).element_id === elementId).reverse();
+      const rows = pruefe(
+        await supabase
+          .from("element_status_verlauf")
+          .select("id, status, geaendert_am, geaendert_von")
+          .eq("element_id", elementId!)
+          .order("geaendert_am", { ascending: false })
+          .limit(11),
+      ) as { id: number; status: ElementStatus; geaendert_am: string; geaendert_von: string | null }[];
+      const uids = [...new Set(rows.map((r) => r.geaendert_von).filter(Boolean))] as string[];
+      const namen = new Map<string, string>();
+      if (uids.length) {
+        const p = pruefe(await supabase.from("profiles").select("id, name, email").in("id", uids)) as { id: string; name: string | null; email: string | null }[];
+        p.forEach((x) => namen.set(x.id, x.name || x.email || "–"));
+      }
+      return rows.map((r) => ({ id: String(r.id), status: r.status, geaendert_am: r.geaendert_am, benutzer: r.geaendert_von ? namen.get(r.geaendert_von) ?? null : null }));
     },
   });
 }
