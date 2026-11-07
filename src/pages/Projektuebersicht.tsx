@@ -7,11 +7,13 @@ import { AblageKarte } from "@/components/AblageKarte";
 import { NavImportButton } from "@/components/NavImportButton";
 import { NeuesProjektDialog } from "@/components/NeuesProjektDialog";
 import { useAuth } from "@/auth/AuthProvider";
+import { ProjektBearbeitenDialog } from "@/components/ProjektBearbeitenDialog";
+import { darfProjektBearbeiten } from "@/lib/projektBearbeitung";
 
 export default function Projektuebersicht() {
   const navigate = useNavigate();
   const { rollen } = useAuth();
-  const darfAnlegen = rollen.some((r) => r === "admin" || r === "projektleitung" || r === "avor");
+  const darfAnlegen = darfProjektBearbeiten(rollen);
   const { projekte, projekt, setProjektId, laedt } = useAktivesProjekt();
 
   return (
@@ -20,6 +22,7 @@ export default function Projektuebersicht() {
         <h1 className="text-2xl font-bold">Projektübersicht</h1>
         {darfAnlegen && (
           <div className="flex flex-wrap gap-2">
+            {projekt && <ProjektBearbeitenDialog key={projekt.id} projekt={projekt} />}
             <NavImportButton onFertig={setProjektId} />
             <NeuesProjektDialog onAngelegt={setProjektId} />
           </div>
