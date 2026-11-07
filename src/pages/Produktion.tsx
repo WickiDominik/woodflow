@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAktivesProjekt } from "@/context/ProjektContext";
 import { useElemente } from "@/data/repository";
 import ElementTabelle from "@/components/ElementTabelle";
-import ModelViewer3D from "@/components/ModelViewer3D";
+import ProduktionModell from "@/components/ProduktionModell";
 
 export default function Produktion() {
   const { projekt } = useAktivesProjekt();
@@ -22,7 +22,7 @@ export default function Produktion() {
           <TabsTrigger value="maschinen">Maschinendaten</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="modell" className="mt-4"><ModelViewer3D /></TabsContent>
+        <TabsContent value="modell" className="mt-4"><ProduktionModell projekt={projekt} elemente={elemente} /></TabsContent>
 
         <TabsContent value="details" className="mt-4">
           <ElementTabelle projektId={projekt?.id} elemente={elemente} isLoading={isLoading} />
