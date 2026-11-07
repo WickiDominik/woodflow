@@ -1,3 +1,3 @@
-- [ ] Projekt bearbeiten für admin/projektleitung/avor ergänzen, bestehende Berechtigungen beibehalten.
-- [ ] Dashboard: Windream kopieren, Nextcloud und Timbar als externe Links.
-- [ ] Gesamte Testsuite und Projektbearbeitung prüfen.
+- [x] Projekt bearbeiten für admin/projektleitung/avor ergänzen, bestehende Berechtigungen beibehalten.
+- [x] Dashboard: Windream kopieren, Nextcloud und Timbar als externe Links.
+- [x] Gesamte Testsuite und angemeldete Projektbearbeitung geprüft; ursprüngliche Testwerte wiederhergestellt.
