@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { NaechsteFristenKarte } from "@/components/NaechsteFristenKarte";
 import { ProjektdatenKarte } from "@/components/ProjektdatenKarte";
+import { ProjektSchnelllinks } from "@/components/ProjektSchnelllinks";
 import { ShieldCheck, Eye, Box } from "lucide-react";
 
 export default function Dashboard() {
@@ -66,6 +67,7 @@ export default function Dashboard() {
 
       <NaechsteFristenKarte projektId={projekt.id} />
       <ProjektdatenKarte projekt={projekt} />
+      <ProjektSchnelllinks projekt={projekt} />
 
       <div className="flex flex-wrap gap-3">
         <Button onClick={() => navigate("/avor")} variant="outline"><Eye className="mr-2 h-4 w-4" />Projekt öffnen</Button>
