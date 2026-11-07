@@ -23,7 +23,7 @@ const meter = (mm: number | null | undefined) => (mm == null ? "–" : `${(mm / 
 const datumZeit = (s: string) =>
   new Date(s).toLocaleString("de-CH", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
-function VerlaufPopover({ element }: { element: Element }) {
+export function VerlaufPopover({ element }: { element: Element }) {
   const [offen, setOffen] = useState(false);
   const { data = [], isLoading } = useElementVerlauf(offen ? element.id : undefined);
   const zeilen = verlaufUebergaenge(data).slice(0, 10);

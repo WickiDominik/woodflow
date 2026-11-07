@@ -34,6 +34,8 @@ export interface Projekt {
   verkaeufer?: string | null;
   nav_status?: string | null;
   nav_import_am?: string | null;
+  ifc_pfad?: string | null;
+  ifc_hochgeladen_am?: string | null;
   fortschritt: Fortschritt;
   qm: QmKennzahlen;
 }
@@ -47,6 +49,7 @@ export interface Element {
   laenge_mm: number | null;
   hoehe_mm: number | null;
   breite_mm?: number | null;
+  cadwork_guid?: string | null;
   status: ElementStatus;
 }
 
@@ -129,12 +132,14 @@ interface ProjektRow {
   verkaeufer: string | null;
   nav_status: string | null;
   nav_import_am: string | null;
+  ifc_pfad: string | null;
+  ifc_hochgeladen_am: string | null;
   elemente: { status: ElementStatus }[];
   qm_punkte: { status: QmStatus; prioritaet: "Hoch" | "Mittel" | "Niedrig" }[];
 }
 
 const PROJEKT_SELECT =
-  "id, nummer, name, beschreibung, ort, status, produktionsstart, windream_pfad, nextcloud_pfad, timbar_url, bauherr, architekt, architekt_telefon, architekt_email, baustelle, projektleiter, verkaeufer, nav_status, nav_import_am, elemente(status), qm_punkte(status, prioritaet)";
+  "id, nummer, name, beschreibung, ort, status, produktionsstart, windream_pfad, nextcloud_pfad, timbar_url, bauherr, architekt, architekt_telefon, architekt_email, baustelle, projektleiter, verkaeufer, nav_status, nav_import_am, ifc_pfad, ifc_hochgeladen_am, elemente(status), qm_punkte(status, prioritaet)";
 
 function zuProjekt(r: ProjektRow): Projekt {
   return {
@@ -157,6 +162,8 @@ function zuProjekt(r: ProjektRow): Projekt {
     verkaeufer: r.verkaeufer,
     nav_status: r.nav_status,
     nav_import_am: r.nav_import_am,
+    ifc_pfad: r.ifc_pfad,
+    ifc_hochgeladen_am: r.ifc_hochgeladen_am,
     fortschritt: berechneFortschritt(r.elemente.map((e) => e.status)),
     qm: berechneQm(r.qm_punkte),
   };
@@ -196,7 +203,7 @@ export function useElemente(projektId: string | undefined) {
       return pruefe<Element[]>(
         await supabase
           .from("elemente")
-          .select("id, baugruppe, bauuntergruppe, typ, geschoss, laenge_mm, hoehe_mm, breite_mm, status")
+          .select("id, baugruppe, bauuntergruppe, typ, geschoss, laenge_mm, hoehe_mm, breite_mm, cadwork_guid, status")
           .eq("projekt_id", projektId!)
           .order("baugruppe"),
       );
@@ -478,4 +485,30 @@ export function useFristen() {
       });
     },
   });
+}
+
+// ------------------------------------------------------------------ IFC-Modell
+
+/** IFC-Datei in den privaten Speicher laden und als neuestes Modell am Projekt vermerken. */
+export function useIfcHochladen(projektId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (datei: File) => {
+      if (!supabase) throw new Error("Im Demo-Modus wird nichts gespeichert.");
+      const pfad = `${projektId}/${Date.now()}.ifc`;
+      const up = await supabase.storage.from("ifc-modelle").upload(pfad, datei, { contentType: "application/octet-stream" });
+      if (up.error) throw new Error(up.error.message);
+      pruefe(await supabase.from("projekte").update({ ifc_pfad: pfad, ifc_hochgeladen_am: new Date().toISOString() }).eq("id", projektId!).select("id"));
+      return pfad;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["projekte"] }),
+  });
+}
+
+/** Signierte Download-URL für das IFC-Modell (1 Stunde gültig). */
+export async function ifcDownloadUrl(pfad: string): Promise<string> {
+  if (!supabase) throw new Error("Demo-Modus");
+  const { data, error } = await supabase.storage.from("ifc-modelle").createSignedUrl(pfad, 3600);
+  if (error || !data) throw new Error(error?.message ?? "Keine URL");
+  return data.signedUrl;
 }
