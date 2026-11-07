@@ -221,6 +221,8 @@ export type Database = {
           beschreibung: string | null
           created_at: string
           id: string
+          ifc_hochgeladen_am: string | null
+          ifc_pfad: string | null
           name: string
           nav_import_am: string | null
           nav_status: string | null
@@ -244,6 +246,8 @@ export type Database = {
           beschreibung?: string | null
           created_at?: string
           id?: string
+          ifc_hochgeladen_am?: string | null
+          ifc_pfad?: string | null
           name: string
           nav_import_am?: string | null
           nav_status?: string | null
@@ -267,6 +271,8 @@ export type Database = {
           beschreibung?: string | null
           created_at?: string
           id?: string
+          ifc_hochgeladen_am?: string | null
+          ifc_pfad?: string | null
           name?: string
           nav_import_am?: string | null
           nav_status?: string | null
