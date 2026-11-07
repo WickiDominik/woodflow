@@ -1,0 +1,4 @@
+ALTER TABLE public.projekte ADD COLUMN IF NOT EXISTS ifc_pfad text, ADD COLUMN IF NOT EXISTS ifc_hochgeladen_am timestamptz;
+CREATE POLICY "ifc lesen" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'ifc-modelle');
+CREATE POLICY "ifc hochladen (PL, AVOR, Admin)" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'ifc-modelle' AND public.has_any_rolle(auth.uid(), ARRAY['admin','projektleitung','avor']::public.app_rolle[]));
+CREATE POLICY "ifc löschen (PL, AVOR, Admin)" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'ifc-modelle' AND public.has_any_rolle(auth.uid(), ARRAY['admin','projektleitung','avor']::public.app_rolle[]));

@@ -29,6 +29,13 @@
       "when": 1793781887120,
       "tag": "0003_projekte_nav_felder",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794075586799,
+      "tag": "0004_ifc_modelle",
+      "breakpoints": true
     }
   ]
 }
