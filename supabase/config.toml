@@ -3,3 +3,5 @@ project_id = "nygusgagsszlllrjncmr"
 verify_jwt = false
 [functions.toolcenter-pruefung]
 verify_jwt = false
+[functions.lignoai-lesen]
+verify_jwt = false
