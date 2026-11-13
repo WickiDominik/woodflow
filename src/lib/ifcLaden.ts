@@ -1,14 +1,50 @@
 // Lädt eine IFC-Datei im Browser mit web-ifc und erzeugt three.js-Geometrien je Bauteil.
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { IfcAPI, IFCELEMENTASSEMBLY, IFCRELAGGREGATES, IFCRELDEFINESBYPROPERTIES } from "web-ifc";
+import { IfcAPI, IFCELEMENTASSEMBLY, IFCMATERIAL, IFCRELAGGREGATES, IFCRELASSOCIATESMATERIAL, IFCRELDEFINESBYPROPERTIES } from "web-ifc";
 import wasmUrl from "web-ifc/web-ifc.wasm?url";
 import type { IfcBaugruppe } from "@/lib/ifcZuordnung";
+import { propArt, type IfcTeilRoh } from "@/lib/ifcFilter";
 
 export interface IfcModell {
   teile: { id: number; geometrie: THREE.BufferGeometry }[];
   baugruppen: IfcBaugruppe[];
   namen: Map<number, string>;
+  /** Name, IFC-Typ, Material, BG/BUG und cadwork-Farbe je Bauteil (expressID). */
+  roh: Map<number, IfcTeilRoh>;
+}
+
+type Api = IfcAPI;
+type Ref = { value: number } | undefined;
+
+/** Materialname über IfcMaterial / LayerSet(Usage) / ProfileSet(Usage) / ConstituentSet / MaterialList. */
+function materialName(api: Api, m: number, id: number, cache: Map<number, string | null>, tiefe = 0): string | null {
+  if (cache.has(id)) return cache.get(id)!;
+  let ergebnis: string | null = null;
+  const l = api.GetLine(m, id);
+  if (l && tiefe < 6) {
+    if (api.GetLineType(m, id) === IFCMATERIAL) ergebnis = l.Name?.value ?? null;
+    else {
+      const ersterRef = (x: Ref | Ref[] | undefined): Ref => (Array.isArray(x) ? x[0] : x);
+      const kandidaten: Ref[] = [
+        l.ForLayerSet,
+        l.ForProfileSet,
+        l.Material,
+        ersterRef(l.MaterialLayers),
+        ersterRef(l.Materials),
+        ersterRef(l.MaterialProfiles),
+        ersterRef(l.MaterialConstituents),
+      ];
+      for (const k of kandidaten) {
+        if (k?.value == null) continue;
+        ergebnis = materialName(api, m, k.value, cache, tiefe + 1);
+        if (ergebnis) break;
+      }
+      ergebnis ??= l.LayerSetName?.value ?? l.Name?.value ?? null;
+    }
+  }
+  cache.set(id, ergebnis);
+  return ergebnis;
 }
 
 export type Fortschritt = (phase: "download" | "verarbeitung", anteil: number | null) => void;
@@ -78,19 +114,48 @@ async function verarbeite(daten: Uint8Array, fortschritt: Fortschritt): Promise<
     const innere = new Set<number>();
     for (const b of baugruppen.values()) for (const t of b.teile) if (t !== b.expressId && baugruppen.has(t)) innere.add(t);
 
-    // Property "Baugruppe"
+    // Property-Sets: BG / BUG / Material je Objekt (Baugruppen und Bauteile)
+    const props = new Map<number, { bg?: string; bug?: string; material?: string }>();
+    const psetCache = new Map<number, { bg?: string; bug?: string; material?: string }>();
     const prels = api.GetLineIDsWithType(m, IFCRELDEFINESBYPROPERTIES);
     for (let i = 0; i < prels.size(); i++) {
       const r = api.GetLine(m, prels.get(i));
-      const betroffen = (r.RelatedObjects ?? []).map((o: { value: number }) => o.value).filter((v: number) => baugruppen.has(v));
-      if (!betroffen.length) continue;
-      const pset = api.GetLine(m, r.RelatingPropertyDefinition?.value);
-      for (const ref of pset?.HasProperties ?? []) {
-        const p = api.GetLine(m, ref.value);
-        if (String(p?.Name?.value ?? "").toLowerCase() === "baugruppe" && p.NominalValue?.value != null) {
-          for (const b of betroffen) baugruppen.get(b)!.baugruppeProp = String(p.NominalValue.value);
+      const psetId = r.RelatingPropertyDefinition?.value;
+      if (psetId == null) continue;
+      let werte = psetCache.get(psetId);
+      if (!werte) {
+        werte = {};
+        const pset = api.GetLine(m, psetId);
+        for (const ref of pset?.HasProperties ?? []) {
+          const p = api.GetLine(m, ref.value);
+          const art = propArt(String(p?.Name?.value ?? ""));
+          const wert = p?.NominalValue?.value;
+          if (art && wert != null && String(wert).trim() && werte[art] == null) werte[art] = String(wert).trim();
         }
+        psetCache.set(psetId, werte);
       }
+      if (werte.bg == null && werte.bug == null && werte.material == null) continue;
+      for (const o of r.RelatedObjects ?? []) {
+        const ziel = props.get(o.value) ?? {};
+        props.set(o.value, { bg: ziel.bg ?? werte.bg, bug: ziel.bug ?? werte.bug, material: ziel.material ?? werte.material });
+      }
+    }
+    for (const b of baugruppen.values()) {
+      b.baugruppeProp = props.get(b.expressId)?.bg ?? null;
+      b.bauuntergruppeProp = props.get(b.expressId)?.bug ?? null;
+    }
+
+    // Material-Zuweisungen (IfcRelAssociatesMaterial)
+    const material = new Map<number, string>();
+    const matCache = new Map<number, string | null>();
+    const mrels = api.GetLineIDsWithType(m, IFCRELASSOCIATESMATERIAL);
+    for (let i = 0; i < mrels.size(); i++) {
+      const r = api.GetLine(m, mrels.get(i));
+      const matId = r.RelatingMaterial?.value;
+      if (matId == null) continue;
+      const name = materialName(api, m, matId, matCache);
+      if (!name) continue;
+      for (const o of r.RelatedObjects ?? []) material.set(o.value, name);
     }
 
     // Geometrie
@@ -98,11 +163,15 @@ async function verarbeite(daten: Uint8Array, fortschritt: Fortschritt): Promise<
     const matrix = new THREE.Matrix4();
     let letzte = Date.now();
     const roh: { id: number; geos: THREE.BufferGeometry[] }[] = [];
+    const teilRoh = new Map<number, IfcTeilRoh>();
+    const typName = new Map<number, string>();
     api.StreamAllMeshes(m, (mesh, index, total) => {
       const geos: THREE.BufferGeometry[] = [];
       const pg = mesh.geometries;
+      let farbe: [number, number, number] | null = null;
       for (let j = 0; j < pg.size(); j++) {
         const p = pg.get(j);
+        if (!farbe && p.color) farbe = [p.color.x, p.color.y, p.color.z];
         const g = api.GetGeometry(m, p.geometryExpressID);
         const v = api.GetVertexArray(g.GetVertexData(), g.GetVertexDataSize());
         const idx = api.GetIndexArray(g.GetIndexData(), g.GetIndexDataSize());
@@ -120,7 +189,21 @@ async function verarbeite(daten: Uint8Array, fortschritt: Fortschritt): Promise<
         geos.push(bg);
         g.delete();
       }
-      if (geos.length) roh.push({ id: mesh.expressID, geos });
+      if (geos.length) {
+        const id = mesh.expressID;
+        roh.push({ id, geos });
+        const typ = api.GetLineType(m, id);
+        if (!typName.has(typ)) typName.set(typ, api.GetNameFromTypeCode(typ));
+        const p = props.get(id);
+        teilRoh.set(id, {
+          name: api.GetLine(m, id)?.Name?.value ?? null,
+          ifcTyp: typName.get(typ) ?? null,
+          material: material.get(id) ?? p?.material ?? null,
+          bg: p?.bg ?? null,
+          bug: p?.bug ?? null,
+          farbe,
+        });
+      }
       if (Date.now() - letzte > 200) {
         letzte = Date.now();
         fortschritt("verarbeitung", total ? (index + 1) / total : null);
@@ -131,7 +214,7 @@ async function verarbeite(daten: Uint8Array, fortschritt: Fortschritt): Promise<
       if (g) teile.push({ id: r.id, geometrie: g });
     }
     fortschritt("verarbeitung", 1);
-    return { teile, baugruppen: [...baugruppen.values()].filter((b) => !innere.has(b.expressId)), namen };
+    return { teile, baugruppen: [...baugruppen.values()].filter((b) => !innere.has(b.expressId)), namen, roh: teilRoh };
   } finally {
     api.CloseModel(m);
   }
