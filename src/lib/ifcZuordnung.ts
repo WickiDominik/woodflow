@@ -50,6 +50,8 @@ export interface IfcBaugruppe {
   name: string | null;
   /** Wert der Eigenschaft "Baugruppe" aus einem Property-Set, falls vorhanden. */
   baugruppeProp: string | null;
+  /** Wert der Eigenschaft "Bauuntergruppe", falls vorhanden. */
+  bauuntergruppeProp?: string | null;
   /** expressIDs aller zugehörigen Bauteile (inkl. der Baugruppe selbst). */
   teile: number[];
 }
