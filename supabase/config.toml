@@ -5,3 +5,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.lignoai-lesen]
 verify_jwt = false
+[functions.teams-fristen]
+verify_jwt = false
