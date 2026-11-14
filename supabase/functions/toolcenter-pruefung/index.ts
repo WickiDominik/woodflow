@@ -3,6 +3,7 @@ import { corsHeaders as baseCors } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { NUMMER_RE, projektFindenOderAnlegen } from '../_shared/projekt.ts'
+import { offenSignatur, pruefungKarte, sendeAnTeams } from '../_shared/teams.ts'
 
 const corsHeaders = {
   ...baseCors,
@@ -83,6 +84,12 @@ Deno.serve(async (req) => {
     const anzahl_offen = sauber.filter((x) => OFFEN.has((x.status ?? '').trim().toUpperCase())).length
     const anzahl_ok = sauber.length - anzahl_offen
 
+    // Vorherige Prüfung desselben Bereichs: die Teams-Meldung geht nur raus, wenn sich die offenen Punkte geändert haben.
+    const { data: vorher } = await supabase
+      .from('ablage_pruefungen').select('punkte')
+      .eq('projekt_id', p.id).eq('bereich', bereich)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle()
+
     const { data: row, error: iErr } = await supabase.from('ablage_pruefungen').insert({
       projekt_id: p.id, bereich, status, anzahl_ok, anzahl_offen, punkte: sauber,
       modell: quelle?.modell ?? null, benutzer: quelle?.benutzer ?? null, version: quelle?.version ?? null,
@@ -97,6 +104,19 @@ Deno.serve(async (req) => {
     if (alt && alt.length) {
       const { error: dErr } = await supabase.from('ablage_pruefungen').delete().in('id', alt.map((r) => r.id))
       if (dErr) throw dErr
+    }
+
+    // Teams-Meldung bei neuen oder geänderten offenen Punkten. Ein Fehler hier darf das Speichern nie scheitern lassen.
+    const teamsUrl = Deno.env.get('TEAMS_WEBHOOK_URL')
+    if (teamsUrl && anzahl_offen > 0 && offenSignatur(sauber) !== offenSignatur(vorher?.punkte)) {
+      const karte = pruefungKarte(
+        { nummer: projekt.nummer, name: projekt.name, bereich, status, punkte: sauber },
+        Deno.env.get('WOODFLOW_APP_URL'),
+      )
+      if (karte) {
+        const r = await sendeAnTeams(teamsUrl, karte)
+        if (!r.ok) console.error('toolcenter-pruefung: Teams-Meldung nicht gesendet:', r.grund)
+      }
     }
 
     return json({ id: row.id, anzahl_ok, anzahl_offen, projekt_neu: p.neu })
